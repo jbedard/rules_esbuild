@@ -1,0 +1,66 @@
+load("@aspect_rules_esbuild//esbuild:defs.bzl", "esbuild")
+load("@aspect_bazel_lib//lib:copy_file.bzl", "copy_file")
+load("@aspect_bazel_lib//lib:directory_path.bzl", "directory_path")
+load("@aspect_bazel_lib//lib:output_files.bzl", "output_files")
+load("//examples:asserts.bzl", "assert_contains")
+load("@aspect_bazel_lib//lib:copy_to_directory.bzl", "copy_to_directory")
+
+
+# Simulate a tool such as typescript outputing to multiple directories
+copy_to_directory(
+    name = "_compiled1",
+    srcs = ["lib.js"],
+)
+copy_to_directory(
+    name = "_compiled2",
+    srcs = ["spec.js"],
+)
+
+# Combine the two compilations into a single directory for esbuild to run on
+copy_to_directory(
+    name = "_merged",
+    srcs = [":_compiled1", ":_compiled2"],
+    root_paths = [
+        "%s/_compiled1" % package_name(),
+        "%s/_compiled2" % package_name(),
+    ],
+)
+
+# Run esbuild on the combined sources
+esbuild(
+    name = "bundle",
+    entry_point = "_merged/lib.js",
+    output_dir = True,
+    srcs = [":_merged"],
+)
+
+
+
+
+
+# output_files(
+#     name = "bundle_directory",
+#     target = ":bundle",
+#     paths = ["examples/splitting/bundle"],
+# )
+
+# directory_path(
+#     name = "lib_directory_path",
+#     directory = ":bundle_directory",
+#     path = "lib.js",
+# )
+
+# # the result of directory_path is a DirectoryPathInfo provider but we want to be able to reference the file directly from assert_contains
+# copy_file(
+#     name = "lib",
+#     src = ":lib_directory_path",
+#     out = "lib.js"
+# )
+
+# assert_contains(
+#     name = "test",
+#     actual = ":lib",
+#     expected = """// examples/splitting/lib.ts
+# console.log("Hello world");
+# //# sourceMappingURL=lib.js.map""",
+# )
