@@ -29,12 +29,19 @@ js_library(
     deps = [":node_modules/lib"],
 )
 
+# Source consuming that named library
+js_library(
+    name = "spec",
+    srcs = ["spec.js"],
+    deps = [":consumer"],
+)
+
 # Run esbuild on the consuming code
 esbuild(
     name = "bundle",
-    entry_point = "consumer.js",
+    entry_point = "spec.js",
     output_dir = True,
-    deps = [":consumer"],
+    deps = [":spec"],
 )
 
 # Test that it builds
