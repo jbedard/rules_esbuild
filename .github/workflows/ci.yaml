@@ -46,6 +46,7 @@ jobs:
           - '.'
           - 'e2e/workspace'
           - 'e2e/npm-links'
+          - 'e2e/tsc-typecheck'
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
